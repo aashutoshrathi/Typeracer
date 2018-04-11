@@ -140,7 +140,7 @@ export default {
 
     typecheck(){
 					Array.from(this.letters).forEach((letter, index) => {
-							letter.status = letter.letter == this.input[index] ? 'complete' : ''
+							letter.status = letter.letter == this.input[index] ? 'complete' : 'error'
 					})
 					if (this.input == this.word + ' '){
 							this.currentWord = this.next(this.currentWord, this.para[this.currentPara].words)
@@ -306,7 +306,7 @@ input {
 }
 
 .letter.complete {
-    color: #6aec2d;
+    color: #29d429;
 }
 
 .letter.error {
