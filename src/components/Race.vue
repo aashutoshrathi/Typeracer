@@ -20,10 +20,10 @@
     </div>
 
     <div class="bada-baxa card bg-light text-dark">
-			<!-- <span> Word: {{ currentWord + 1 }}/{{ para[currentPara].words.length }}, Letter: {{ currentLetter }}/{{ para[currentPara].letters.length }} </span>       -->
+			<span> Word: {{ currentWord + 1 }}/{{ para[currentPara].words.length }}, Letter: {{ currentLetter }}/{{ para[currentPara].words[currentWord].letters.length }} </span>      
       <div class="card-body unselectable parag">
-			  <span class="word" :class="{complete: word.status == 'complete', next: index == currentWord}" :data-id="index" v-for="(word, index) in para[currentPara].words">
-					<span class="letter" v-for="letter in word.letters" v-text="letter.letter" :class="{error: letter.status == 'error', complete: letter.status == 'complete'}"></span>
+			  <span class="word" :class="{complete: word.status == 'complete', next: index == currentWord}" :data-id="index" v-for="(word, index) in para[currentPara].words" :key="index">
+					<span class="letter" :data-id="index" v-for="(letter, index) in word.letters" :key="index" v-text="letter.letter" :class="{error: letter.status == 'error', complete: letter.status == 'complete'}"></span>
 			  </span>
       </div>
     </div>
@@ -48,7 +48,6 @@
 
         <!-- Disabled editors like Grammarly using data-gramm_editor :p-->
         <input type="text" data-gramm_editor="false" class="inp" v-model="input" @input="typecheck">
-        
       </div>
 </template>
 
@@ -57,12 +56,11 @@
 
 import firebase, {
   paraRef
-} from '../firebase/index'
+} from '../firebase/index.js'
 import Vue from 'vue'
 import Vuefire from 'vuefire'
 import dateFilter from '../utils/filter.js';
 import moment from 'moment'
-import { messaging } from 'firebase';
 Vue.use(Vuefire);
 
 export default {
@@ -78,8 +76,6 @@ export default {
       currentLetter: 0,
     };
   },
-
-
 
   firebase: {
     // can bind to either a direct Firebase reference or a query
@@ -171,6 +167,7 @@ export default {
       this.Paras.forEach((eachObj) => {
         this.msgPara.push(eachObj.message);
       });
+
 			this.para = this.msgPara.map(x => {
 					return {
 							status: '',

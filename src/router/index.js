@@ -6,11 +6,23 @@ import Race from '../components/Race.vue';
 
 
 const router = new Router({
-    routes: [
-        { path: '/', component: Auth },
-        { path: '/auth', component: Auth },
-        { path: '/race', component: Race }
-    ]
+  routes: [
+    {
+      path: "/",
+      component: Auth
+    },
+    {
+      path: "/auth",
+      component: Auth
+    },
+    {
+      path: "/race",
+      component: Race,
+      meta: {
+        requiresAuth: true
+      }
+    }
+  ]
 });
 
 export default router;

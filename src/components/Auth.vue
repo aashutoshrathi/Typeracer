@@ -41,10 +41,10 @@
 
 <script>
  /* eslint-disable */
-import {config} from '../firebase/index'
+import {config} from '../firebase/index.js'
 import {
   twitterAuth, GoogleAuth, GitAuth
-} from '../firebase/auth'
+} from '../firebase/auth.js'
 export default {
   name: 'auth',
   data() {
@@ -54,7 +54,7 @@ export default {
   },
   methods: {
     twitterAuth() {
-      twitterAuth()
+      twitterAuth ()
     },
     GoogleAuth() {
       GoogleAuth ()
@@ -65,8 +65,6 @@ export default {
   }
 }
 </script>
-
-
 
 <style>
 .text {

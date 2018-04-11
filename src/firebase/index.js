@@ -11,7 +11,6 @@ export const config = {
 
 firebase.initializeApp(config)
 
-var firebaseRef = firebase.database().ref()
+var firebaseRef = firebase.database()
 export default firebase
-export var raceRef = firebaseRef.child('race')
-export var paraRef = firebaseRef.child('paragraphs')
+export var paraRef = firebaseRef.ref('paragraphs')
