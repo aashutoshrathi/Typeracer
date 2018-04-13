@@ -9,8 +9,8 @@
             <a class="active" href="#home">Home</a>
             <a target="_blank" href="http://aashutoshrathi.co">About</a>
             <a href='' @click="logOut()" style="align:right;">Signout</a>
-            <img width="47px" :src=getPhotoURL()>
-            <a>{{ getUserName() }}</a>
+            <img width="47px" :src="this.userPic">
+            <a>{{ this.username }}</a>
           </div>
         </div>
       </nav>
@@ -19,9 +19,12 @@
       </main>
     </div>
 
-    <div class="bada-baxa card bg-light text-dark">
-			<span> Word: {{ currentWord + 1 }}/{{ para[currentPara].words.length }}, Letter: {{ currentLetter }}/{{ para[currentPara].words[currentWord].letters.length }} </span>      
-      <div class="card-body unselectable parag">
+    <div class="bada-baxa-para card bg-light text-dark">
+      <span v-show="started">Time Left: {{this.timerDetails}}</span>
+      <span v-show="started">Speed: {{this.speed}} WPM</span>
+      <h4 v-show="finished">{{this.username}} completed race with {{this.speed}} WPM</h4>
+			<!-- <span> Word: {{ currentWord + 1 }}/{{ para[currentPara].words.length }}, Letter: {{ currentLetter }}/{{ para[currentPara].words[currentWord].letters.length }} </span>       -->
+      <div v-show="!finished" class="card-body unselectable parag">
 			  <span class="word" :class="{complete: word.status == 'complete', next: index == currentWord}" :data-id="index" v-for="(word, index) in para[currentPara].words" :key="index">
 					<span class="letter" :data-id="index" v-for="(letter, index) in word.letters" :key="index" v-text="letter.letter" :class="{error: letter.status == 'error', complete: letter.status == 'complete'}"></span>
 			  </span>
@@ -55,7 +58,7 @@
 /*eslint-disable*/
 
 import firebase, {
-  paraRef
+  paraRef, raceRef
 } from '../firebase/index.js'
 import Vue from 'vue'
 import Vuefire from 'vuefire'
@@ -68,19 +71,25 @@ export default {
   data: function() {
     return {
       loading: true,
-      msgPara: [],
+      msgPara: ['Ye ek hardcoded paragraph hai'],
       para: [],
       input: '',
       currentPara: 0,
       currentWord: 0,
       currentLetter: 0,
+      username: '',
+      userPic: '',
+      timerDetails: '',
+      started: false,
+      finished: false,
+      speed: 0,
     };
   },
 
   firebase: {
     // can bind to either a direct Firebase reference or a query
-    //anArray: raceRef,
     Paras: paraRef,
+    races: raceRef,
     // optionally provide the cancelCallback
     cancelCallback: function () {
     },
@@ -126,22 +135,83 @@ export default {
       }
     },
 
-    getUserId() {
-      return firebase.auth().currentUser.uid;
+    addRaceInfo() {
+      raceRef.push({
+        user: {
+          uid: firebase.auth().currentUser.uid,
+          name: firebase.auth().currentUser.displayName,
+          dp: firebase.auth().currentUser.photoURL,
+          speed: 0,
+        },
+        paraUsed: this.currentPara,
+      })
     },
+    
     getUserName() {
-      return firebase.auth().currentUser.displayName;
+      return new Promise(function (resolve, reject) {
+        firebase.auth().onAuthStateChanged(function (user) {
+          if (user) {
+            resolve(user.displayName);
+          } else {
+            reject(Error('It broke'));
+          }
+        });
+      });
     },
+
     getPhotoURL() {
-      if(firebase.auth().currentUser) {
-        return firebase.auth().currentUser.photoURL;
+      return new Promise(function (resolve, reject) {
+        firebase.auth().onAuthStateChanged(function (user) {
+          if (user) {
+            resolve(user.photoURL);
+          } else {
+            reject(Error('It broke'));
+          }
+        });
+      });
+    },
+
+    timerStart(seconds) {
+      clearInterval(countdown);
+      const now = Date.now();
+      this.started = true;
+      const then = now + seconds * 1000;
+      this.displayTimeLeft(seconds);
+      var countdown = setInterval(() => {
+        const secondsLeft = Math.round((then - Date.now()) / 1000);
+        if (secondsLeft < 0 || this.finished) {
+          clearInterval(countdown);
+          this.started = false;
+          return;
+        }
+        this.displayTimeLeft(secondsLeft);
+      }, 1000);
+    },
+
+    displayTimeLeft(seconds) {
+      const hour = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const remainderSeconds = seconds % 60;
+      const display = `${hour < 10 ? '0' : ''}${hour}:${minutes < 10 ? '0' : ''}${minutes}:${remainderSeconds < 10 ? '0' : ''}${remainderSeconds}`;
+      this.timerDetails = display;
+      const mins = 1.99 - (remainderSeconds/60 + minutes);
+      if(Math.floor((this.currentWord + 1)/(mins)) > 0) {
+        this.speed = Math.floor((this.currentWord + 1)/(mins));
+      }
+      var finish = this.currentWord + 1 == this.para[this.currentPara].words.length && this.currentLetter == this.para[this.currentPara].words[this.currentWord].letters.length;
+      if (hour === 0 && minutes === 0 && remainderSeconds === 0 || finish ) {
+        console.log("You completed race with", this.speed, " WPM");
+        this.finished = true;
       }
     },
 
     typecheck(){
 					Array.from(this.letters).forEach((letter, index) => {
 							letter.status = letter.letter == this.input[index] ? 'complete' : 'error'
-					})
+          })
+          if(this.letters[0].status == "complete" && !this.started) {
+            this.timerStart(120);
+          }
 					if (this.input == this.word + ' '){
 							this.currentWord = this.next(this.currentWord, this.para[this.currentPara].words)
 							this.input = ''
@@ -161,13 +231,23 @@ export default {
 					this.currentWord = 0
 					this.currentLetter = 0
 					this.input = ''
-			}
+      },
   },
+  beforeMount () {
+    this.getUserName().then((param) => {
+      this.username = param;
+    });
+
+    this.getPhotoURL().then((param) => {
+      this.userPic = param;
+    });    
+  },
+
   created: function () {
       this.Paras.forEach((eachObj) => {
         this.msgPara.push(eachObj.message);
       });
-
+      this.currentPara = Math.floor(Math.random()*this.msgPara.length)
 			this.para = this.msgPara.map(x => {
 					return {
 							status: '',
@@ -193,7 +273,7 @@ export default {
 			},
 			word(){
 					return this.para[this.currentPara].words[this.currentWord].fullWord
-			},
+      },
 	}
 }
 </script>
@@ -203,6 +283,12 @@ export default {
   overflow: hidden;
   background-color: #f1f1f1;
   padding: 10px 10px;
+}
+
+.btn {  
+  display: inline-block;
+  margin: 5% 45% 0% 45%;
+  width: 7%;
 }
 
 /* Style the header links */
@@ -281,7 +367,6 @@ export default {
   overflow: inherit;
 }
 
-
 * {
     box-sizing: border-box;
 }
@@ -313,7 +398,15 @@ input {
     color: red;
 }
 
-.bada-baxa {
+.bada-baxa-para {
     align-items: center;
+}
+
+.bada-baxa-time {
+    align-items: right;
+}
+
+.bada-baxa-speed {
+    align-items: left;
 }
 </style>
