@@ -57,14 +57,15 @@
 <script>
 /*eslint-disable*/
 
-import firebase, {
-  paraRef, raceRef
-} from '../firebase/index.js'
+import firebase from '../firebase/index.js'
 import Vue from 'vue'
 import Vuefire from 'vuefire'
 import dateFilter from '../utils/filter.js';
 import moment from 'moment'
 Vue.use(Vuefire);
+
+var db = firebase.database()
+var paraRef = db.ref('paragraphs')
 
 export default {
   name: 'race',
@@ -73,6 +74,7 @@ export default {
       loading: true,
       msgPara: ['Ye ek hardcoded paragraph hai'],
       para: [],
+      Paras: [],
       input: '',
       currentPara: 0,
       currentWord: 0,
@@ -84,19 +86,6 @@ export default {
       finished: false,
       speed: 0,
     };
-  },
-
-  firebase: {
-    // can bind to either a direct Firebase reference or a query
-    Paras: paraRef,
-    races: raceRef,
-    // optionally provide the cancelCallback
-    cancelCallback: function () {
-    },
-    // this is called once the data has been retrieved from firebase
-    readyCallback: function () {
-
-    }
   },
 
   filters: {
@@ -233,6 +222,11 @@ export default {
 					this.input = ''
       },
   },
+  
+  beforeCreate() {
+    
+  },
+
   beforeMount () {
     this.getUserName().then((param) => {
       this.username = param;
@@ -240,13 +234,23 @@ export default {
 
     this.getPhotoURL().then((param) => {
       this.userPic = param;
-    });    
+    }); 
+
+    return new Promise((resolve, reject) => {
+      firebase.auth().onAuthStateChanged((user) => {
+        this.$bindAsArray('Paras', paraRef);
+        console.log(this, 'andar wala');
+      });
+      this.Paras.forEach((eachObj) => {
+        this.msgPara.push(eachObj.message);
+        console.log('hell');
+      });
+    });  
   },
 
   created: function () {
-      this.Paras.forEach((eachObj) => {
-        this.msgPara.push(eachObj.message);
-      });
+      // console.log(this.Paras);
+
       this.currentPara = Math.floor(Math.random()*this.msgPara.length)
 			this.para = this.msgPara.map(x => {
 					return {

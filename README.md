@@ -21,17 +21,6 @@ Coming soon
 - [<img src="assets/node.png" width="80">](https://nodejs.org/en/)
 - [<img src="assets/oauth-2.png" width="30">](https://developers.google.com/identity/protocols/OAuth2)
 
-## Author ✍️
-<details>
-	<summary>Team  MA<sup>2</sup>P</summary>
-		<ul>
-			<li><a href="https://github.com/violentdelight">Mohak Khare</a></li>
-			<li><a href="https://github.com/llGurudevll">Ajay Guru</a></li>
-			<li><a href="https://github.com/aashutoshrathi">Aashutosh Rathi</a></li>
-			<li><a href="https://github.com/prithaupadhyay">Pritha Upadhyay</a></li>
-		</ul>
-</details>
-
 ## Contribute
 Found a bug, please [create an issue](https://github.com/aashutoshrathi/Typeracer/issues/new)
 
