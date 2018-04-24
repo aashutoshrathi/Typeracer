@@ -223,8 +223,11 @@ export default {
       },
   },
   
-  beforeCreate() {
-    
+  mounted() {
+    this.Paras.forEach((eachObj) => {
+      this.msgPara.push(eachObj.message);
+      console.log('Kya ho rha hai yrr? -_-');
+    });
   },
 
   beforeMount () {
@@ -239,11 +242,8 @@ export default {
     return new Promise((resolve, reject) => {
       firebase.auth().onAuthStateChanged((user) => {
         this.$bindAsArray('Paras', paraRef);
-        console.log(this, 'andar wala');
-      });
-      this.Paras.forEach((eachObj) => {
-        this.msgPara.push(eachObj.message);
-        console.log('hell');
+        console.log('Kya ho rha hai yrr? -_-');
+        console.log('This is paras: ', this.Paras); 
       });
     });  
   },
