@@ -13,4 +13,4 @@ firebase.initializeApp(config)
 var firebaseRef = firebase.database()
 export default firebase
 export var paraRef = firebaseRef.ref('paragraphs')
-// export var raceRef = firebaseRef.ref('race')
+export var raceRef = firebaseRef.ref('race')
