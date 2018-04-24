@@ -72,7 +72,7 @@ export default {
   data: function() {
     return {
       loading: true,
-      msgPara: ['Ye ek hardcoded paragraph hai'],
+      msgPara: ['This is one is hardcoded paragraph.'],
       para: [],
       Paras: [],
       input: '',
